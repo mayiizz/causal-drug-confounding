@@ -1,0 +1,21 @@
+# Virtual environment
+venv/
+.venv/
+
+# Data
+data/
+
+# Outputs
+output/
+tmp_gsea/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
