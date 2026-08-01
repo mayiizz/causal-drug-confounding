@@ -2,7 +2,6 @@
 """
 Phase 7: Validation & Cross-Dataset Reproducibility.
 Pathway validation (A/B/C/D) and cross-dataset rank correlation.
-Includes supplementary analysis: direct DR-ATE correlation across datasets.
 """
 
 import sys
@@ -13,7 +12,6 @@ sys.path.insert(0, str(project_root))
 
 import pandas as pd
 import numpy as np
-from scipy.stats import spearmanr, kendalltau
 from src.validation.pathway_validation import run_pathway_validation
 from src.validation.cross_dataset import compute_cross_dataset_reproducibility
 
@@ -28,7 +26,7 @@ def main():
     # ------------------------------------------------------------------
     # 1. Pathway Validation
     # ------------------------------------------------------------------
-    print("\n[1/3] Pathway validation (Model A/B/C/D)...")
+    print("\n[1/2] Pathway validation (Model A/B/C/D)...")
     
     # Select a few key cohorts for deep validation
     test_cases = [
@@ -77,9 +75,9 @@ def main():
                     print("    ⚠️  Model B does NOT perform best")
     
     # ------------------------------------------------------------------
-    # 2. Cross-Dataset Reproducibility: |Naive − DR| Divergence
+    # 2. Cross-Dataset Reproducibility
     # ------------------------------------------------------------------
-    print("\n[2/3] Cross-dataset reproducibility (divergence |Naive − DR|)...")
+    print("\n[2/2] Cross-dataset reproducibility...")
     
     comparison = pd.read_parquet(PROCESSED / 'ate_comparison.parquet')
     gdsc_comp = comparison[comparison['dataset'] == 'GDSC2']
@@ -94,44 +92,6 @@ def main():
     # Save merged data for Figure 1
     if repro['merged_data'] is not None:
         repro['merged_data'].to_parquet(PROCESSED / 'cross_dataset_reproducibility.parquet', index=False)
-    
-    # ------------------------------------------------------------------
-    # 3. SUPPLEMENTARY: Cross-Dataset Reproducibility of DR ATEs Directly
-    # ------------------------------------------------------------------
-    print("\n[3/3] SUPPLEMENTARY: Cross-dataset correlation of DR ATEs directly...")
-    
-    try:
-        estimates = pd.read_parquet(PROCESSED / 'causal_estimates.parquet')
-        dr_estimates = estimates[estimates['estimator'] == 'DR'].copy()
-        
-        # Pivot to wide format: one row per (drug_class, pathway), columns per dataset
-        dr_wide = dr_estimates.pivot_table(
-            index=['drug_class', 'pathway'],
-            columns='dataset',
-            values='ate',
-            aggfunc='first'
-        ).reset_index().dropna(subset=['GDSC2', 'CCLE'])
-        
-        if len(dr_wide) >= 5:
-            rho, pval = spearmanr(dr_wide['GDSC2'], dr_wide['CCLE'])
-            tau, tpval = kendalltau(dr_wide['GDSC2'], dr_wide['CCLE'])
-            
-            print(f"\n  Shared DR-ATE cohorts: {len(dr_wide)}")
-            print(f"  Spearman ρ: {rho:.3f} (p={pval:.4f})")
-            print(f"  Kendall τ:  {tau:.3f} (p={tpval:.4f})")
-            
-            # Save supplementary results
-            supp_results = pd.DataFrame({
-                'metric': ['spearman_rho', 'spearman_p', 'kendall_tau', 'kendall_p', 'n_cohorts'],
-                'value': [rho, pval, tau, tpval, len(dr_wide)]
-            })
-            supp_results.to_csv(PROCESSED / 'cross_dataset_dr_ate_correlation.csv', index=False)
-            print(f"  Saved: {PROCESSED / 'cross_dataset_dr_ate_correlation.csv'}")
-        else:
-            print("  Not enough shared cohorts for direct DR-ATE correlation.")
-            
-    except Exception as e:
-        print(f"  Skipped supplementary analysis: {e}")
     
     # ------------------------------------------------------------------
     # Summary

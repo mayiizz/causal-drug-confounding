@@ -159,35 +159,21 @@ def load_ccle_response(filepath: str) -> pd.DataFrame:
         'raw_ic50': pd.to_numeric(df[ic50_col], errors='coerce')
     })
     
-    # =====================================================================
-    # FIX: Clean raw IC50 BEFORE any transformation
-    # =====================================================================
-    n_raw = len(result)
-    
-    # 1. Drop NaN, inf, zero, and negative values
-    result = result.dropna(subset=['raw_ic50'])
-    result = result[np.isfinite(result['raw_ic50'])]
-    result = result[result['raw_ic50'] > 0]
-    n_clean = len(result)
-    print(f"    Dropped {n_raw - n_clean} rows with invalid IC50 (NaN/inf/zero/negative)")
-    
-    # 2. Detect AUC (0-1) vs raw IC50 (>0)
-    if result['raw_ic50'].max() <= 1.5 and result['raw_ic50'].min() >= 0:
+    # Detect if AUC (0-1) or IC50 (>0)
+    valid = result['raw_ic50'].dropna()
+    if valid.max() <= 1.5 and valid.min() >= 0:
         # AUC: convert to -log(AUC) so higher = more sensitive
-        print(f"    Detected AUC scale (max={result['raw_ic50'].max():.3f}), converting to -log(AUC)")
+        print(f"  Detected AUC scale (max={valid.max():.3f}), converting to -log(AUC)")
         result['ln_ic50'] = -np.log(result['raw_ic50'].clip(lower=1e-6))
     else:
         # Raw IC50: take natural log
-        print(f"    Detected IC50 scale (max={result['raw_ic50'].max():.1f}), converting to ln(IC50)")
-        result['ln_ic50'] = np.log(result['raw_ic50'])
+        print(f"  Detected IC50 scale (max={valid.max():.1f}), converting to ln(IC50)")
+        result['ln_ic50'] = np.log(result['raw_ic50'].clip(lower=1e-6))
     
-    # 3. Hard-cap extreme outliers in log-space
-    #    GDSC2 range is [-2.7, +7.8]. Bounds [-15, 10] catch 1e299 placeholders
-    #    while preserving legitimate resistant lines.
-    n_before_cap = len(result)
-    result = result[(result['ln_ic50'] >= -15) & (result['ln_ic50'] <= 10)]
-    n_after_cap = len(result)
-    print(f"    Capped {n_before_cap - n_after_cap} log-outliers outside [-15, 10]")
+    # Clip extreme outliers (beyond ±4 SD)
+    mean_val = result['ln_ic50'].mean()
+    std_val = result['ln_ic50'].std()
+    result['ln_ic50'] = result['ln_ic50'].clip(mean_val - 4*std_val, mean_val + 4*std_val)
     
     result = result.dropna(subset=['ln_ic50'])
     print(f"  Final response: {len(result)} rows, ln_ic50 range: [{result['ln_ic50'].min():.2f}, {result['ln_ic50'].max():.2f}]")

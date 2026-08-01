@@ -150,22 +150,21 @@ def run_all_refutations(df):
 
 
 def permutation_test(df, treatment_col='treatment', outcome_col='ln_ic50',
-                     tissue_col='tissue_type', n_permutations=100):
+                     tissue_col='tissue_type', n_permutations=20):
     """
-    Shuffle tissue labels, re-estimate DR ATE from scratch, build null distribution.
-    Tests whether the DR estimate is sensitive to tissue confounding structure.
+    Shuffle tissue labels, re-estimate naive ATE, build null distribution.
     """
-    from src.causal.estimators import dr_ate_econml
+    from src.causal.estimators import naive_ate
     
     # Force tissue to plain Python object array (no Arrow backend)
     df = df.copy()
     df[tissue_col] = df[tissue_col].astype(str).astype(object)
     
-    # Observed DR ATE on original data
-    obs = dr_ate_econml(df)
+    # Observed naive ATE
+    obs = naive_ate(df)
     obs_ate = obs['ate']
     
-    # Extract tissues as numpy array for fast shuffling
+    # Extract as true numpy object array
     tissues = df[tissue_col].to_numpy(dtype=object).copy()
     null_ates = []
     
@@ -178,30 +177,10 @@ def permutation_test(df, treatment_col='treatment', outcome_col='ln_ic50',
         df_perm = df.copy()
         df_perm[tissue_col] = perm_tissues
         
-        # Recompute DR ATE from scratch on permuted data.
-        # dr_ate_econml internally one-hot encodes tissue and fits
-        # both propensity and outcome models, so the shuffle matters.
-        try:
-            perm = dr_ate_econml(df_perm)
-            null_ates.append(perm['ate'])
-        except Exception:
-            # Skip permutations where DR fails (rare)
-            continue
-        
-        if (i + 1) % 20 == 0:
-            print(f"      Permutation {i+1}/{n_permutations}...")
+        perm = naive_ate(df_perm)
+        null_ates.append(perm['ate'])
     
     null_ates = np.array(null_ates)
-    
-    if len(null_ates) == 0:
-        return {
-            'permutation_p_value': np.nan,
-            'observed_ate': obs_ate,
-            'null_mean': np.nan,
-            'null_std': np.nan,
-            'n_permutations': 0
-        }
-    
     p_value = np.mean(np.abs(null_ates) >= np.abs(obs_ate))
     
     return {

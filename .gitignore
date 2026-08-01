@@ -1,21 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 # Virtual environment
 venv/
 .venv/
+env/
 
-# Data
-/data/
-
-# Outputs
-output/
-tmp_gsea/
-
-# Python
-__pycache__/
-*.py[cod]
-
-# VS Code
+# IDE
 .vscode/
+.idea/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Large datasets
+data/
+datasets/
+*.csv
+*.zip
+*.tar.gz
+*.h5
+*.pth
+*.pt
+*.ckpt
