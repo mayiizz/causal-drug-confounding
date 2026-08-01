@@ -3,7 +3,7 @@ venv/
 .venv/
 
 # Data
-data/
+/data/
 
 # Outputs
 output/
