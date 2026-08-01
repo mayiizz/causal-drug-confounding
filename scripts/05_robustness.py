@@ -105,7 +105,7 @@ def main():
             continue
         
         print(f"  {dataset} {drug_class} × {pw_short} (n={len(sub)})...")
-        perm = permutation_test(sub, n_permutations=50)  # 100 for speed
+        perm = permutation_test(sub, n_permutations=100)  # 100 for speed
         
         perm['dataset'] = dataset
         perm['drug_class'] = drug_class
