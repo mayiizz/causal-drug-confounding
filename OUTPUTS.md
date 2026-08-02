@@ -1,0 +1,102 @@
+# OUTPUTS.md - Generated Artifacts
+
+This document maps every major pipeline output to its producing phase, script, and manuscript role.
+
+Paths are relative to the repository root.
+
+---
+
+## A. Publication figures (`output/`)
+
+Produced by **Phase 09** - `scripts/09_generate_figures.py`.
+
+| File | Phase | Purpose | Manuscript usage |
+|------|-------|---------|------------------|
+| `output/figure1_cross_dataset_reproducibility.png` | 09 | GDSC2 vs CCLE ATE concordance | Main results / reproducibility |
+| `output/figure2_pathway_validation.png` | 09 | Pathway Models A-D | Design / pathway validation |
+| `output/figure3_cate_heatmap.png` | 09 | Tissue-level CATE heatmap | Heterogeneity |
+| `output/figure4_counterfactual_reranking.png` | 09 | Counterfactual response shifts | Counterfactual analysis |
+| `output/figure5_common_support.png` | 09 | Propensity overlap / support | Identification / positivity |
+| `output/figure6_permutation_null.png` | 09 | DR tissue-permutation nulls | Robustness |
+| `output/figure7_power_adequacy.png` | 09 | Cohort power / ESS labels | Power / stability |
+| `output/figure8_baseline_svr.png` | 09 | SVR predictive baseline | Predictive comparison |
+| `output/figure9_baseline_xgboost.png` | 09 | XGBoost predictive baseline | Predictive comparison |
+
+---
+
+## B. Publication tables (`output/`)
+
+| File | Phase | Producing script | Purpose | Manuscript usage |
+|------|-------|------------------|---------|------------------|
+| `output/table1_causal_estimates.csv` | 09 | `09_generate_figures.py` | Naive / IPW / DR ATEs + bootstrap CIs | Main results table |
+| `output/table2_refutation_tests.csv` | 09 | `09` (data from Phase 05) | Placebo / random cause / subset refuters | Robustness |
+| `output/table3_sensitivity_analysis.csv` | 09 | `09` (data from Phase 05) | Threshold x support grid | Sensitivity |
+| `output/table4_common_support.csv` | 09 | `09` (data from Phase 03) | Overlap / retention | Positivity |
+| `output/table5_power_analysis.csv` | 09 | `09` (data from Phase 08) | ESS, overlap, adequacy | Power |
+| `output/table5_baseline_metrics.csv` | 09 / 10 | `09` and/or `10_baseline_models.py` | SVR / XGBoost metrics | Baselines |
+| `output/table6_permutation_results.csv` | 05 | `05_robustness.py` | DR permutation summaries + null CIs | Robustness |
+
+---
+
+## C. Core processed datasets (`data/processed/`)
+
+| File / pattern | Phase | Script | Purpose |
+|----------------|-------|--------|---------|
+| `gdsc2_unified.parquet` | 01 | `01_build_unified_data.py` | Harmonized GDSC2 analysis table |
+| `ccle_unified.parquet` | 01 | `01_build_unified_data.py` | Harmonized CCLE analysis table |
+| `ccle_response_correction_audit.parquet` (+ `.csv`) | 01 | loaders via 01 | CCLE response QC audit trail |
+| `duplicate_response_audit.csv` | 01 | loaders via 01 | PRISM duplicate aggregation audit |
+| `gdsc2_cohort_*.parquet` / `ccle_cohort_*.parquet` | 02 | `02_preprocess_cohorts.py` | Pathway-specific cohorts + treatment |
+| `*_thresholds_*.parquet` | 02 | `02` | Tercile cutoffs per class x pathway |
+| `cross_dataset_cohorts.parquet` | 02 | `02` | Shared cohort metadata |
+| `common_support_report.parquet` | 03 | `03_common_support.py` | Full support bound grid |
+| `common_support_default.parquet` | 03 | `03` | Default trim (0.10, 0.90) |
+| `balance_diagnostics.parquet` | 03b | `03b_balance_diagnostics.py` | Tissue SMD details |
+| `balance_summary.parquet` | 03b | `03b` | Cohort-level balance summary |
+| `causal_estimates.parquet` | 04 | `04_causal_estimation.py` | Bootstrapped ATEs |
+| `ate_comparison.parquet` | 04 | `04` | Wide Naive/IPW/DR comparison |
+| `refutation_results.parquet` | 05 | `05_robustness.py` | Per-refuter rows |
+| `refutation_summary.parquet` | 05 | `05` | Cohort-level refutation status |
+| `permutation_results.parquet` | 05 | `05` | DR permutation summaries |
+| `permutation_null_distribution.parquet` | 05 | `05` | Null DR draws |
+| `sensitivity_results.parquet` | 05 | `05` | Threshold/support grid ATEs |
+| `cate_estimates.parquet` | 06 | `06_heterogeneity.py` | Tissue CATEs |
+| `cate_heatmap.parquet` | 06 | `06` | Heatmap-ready CATE matrix |
+| `counterfactual_predictions.parquet` | 06b | `06b_counterfactual.py` | Y(0), Y(1), deltas |
+| `counterfactual_summary.parquet` | 06b | `06b` | Aggregated CF stats |
+| `counterfactual_top_*.csv` | 06b | `06b` | Top tissues / drug classes by shift |
+| `pathway_validation.parquet` | 07 | `07_validation.py` | Models A-D |
+| `cross_dataset_reproducibility.parquet` | 07 | `07` | Cross-dataset ATE pairs |
+| `power_analysis.parquet` | 08 | `08_power_analysis.py` | Per-cohort ESS / adequacy |
+| `power_summary.parquet` | 08 | `08` | Summary power tables |
+| `baseline_*_{results,predictions}.parquet` | 10 | `10_baseline_models.py` | Predictive baselines |
+
+---
+
+## D. Validation / audit artifacts (not produced by Phases 01-10)
+
+These files may appear under `output/` from scientific validation sessions. They are **not** regenerated by `run_pipeline.py` and are **not** required for paper figure/table reproduction:
+
+| Pattern | Role |
+|---------|------|
+| `output/stage1*_*.json` | Stage 1 data validation audits |
+| `output/stage2*_*.json` / `stage2*_*.csv` / `figure_stage2*.png` | Biological validation audits |
+| `output/stage3a_*.json` | Causal assumption audit |
+| `output/stage4_*.json` | Estimator validation audit |
+| `output/stage5_*.json` / `table6b_*.csv` | Robustness / permutation upgrade audits |
+| `output/figure_stage1b_*.png` | Stage 1B diagnostic figure |
+| `data/processed/permutation_*_n20_archive.parquet` | Archived B=20 permutation results |
+| `archive/logs/phase*.log` | Historical run logs (developer) |
+
+See `archive/validation_audits/README.md`.
+
+---
+
+## E. How outputs are regenerated
+
+```bash
+python run_pipeline.py
+# or, figures/tables only after processed data exist:
+python scripts/09_generate_figures.py
+python scripts/10_baseline_models.py
+```

@@ -93,7 +93,7 @@ def main():
     
     print(f"\nSaved: {PROCESSED / 'cate_estimates.parquet'}")
     print(f"Saved: {PROCESSED / 'cate_heatmap.parquet'}")
-    print("\nNext: Phase 7 (Validation & Cross-Dataset Reproducibility)")
+    print("\nNext: Phase 6B (Counterfactual Analysis)")
 
 
 if __name__ == '__main__':
