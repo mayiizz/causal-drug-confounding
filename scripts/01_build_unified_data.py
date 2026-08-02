@@ -102,7 +102,8 @@ def main():
         harmonize_fn=harmonize_tissue,
         drug_class_fn=map_drug_to_class,
         pathway_score_fn=pathway_fn,
-        output_path=str(PROCESSED / 'ccle_unified.parquet')
+        output_path=str(PROCESSED / 'ccle_unified.parquet'),
+        audit_path=str(PROCESSED / 'ccle_response_correction_audit.parquet'),
     )
     
     # 6. Validate CCLE
@@ -128,7 +129,7 @@ def main():
             f_stat, p_val = f_oneway(*groups)
             n_total = sum(len(g) for g in groups)
             eta_sq = f_stat * (len(groups) - 1) / (f_stat * (len(groups) - 1) + (n_total - len(groups)))
-            print(f"  {name}: Tissue -> EMT Eta² = {eta_sq:.3f}")
+            print(f"  {name}: Tissue -> EMT Eta^2 = {eta_sq:.3f}")
     
     # 8. Final summary
     print("\n" + "=" * 60)

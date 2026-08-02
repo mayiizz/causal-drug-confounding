@@ -72,7 +72,7 @@ def main():
                 if b_r2[0] > a_r2[0] and b_r2[0] > c_r2[0]:
                     print("    ✅ Model B (true pathway) performs best")
                 else:
-                    print("    ⚠️  Model B does NOT perform best")
+                    print("    WARNING: Model B does NOT perform best")
     
     # ------------------------------------------------------------------
     # 2. Cross-Dataset Reproducibility

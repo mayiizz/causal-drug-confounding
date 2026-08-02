@@ -150,43 +150,22 @@ def run_all_refutations(df):
 
 
 def permutation_test(df, treatment_col='treatment', outcome_col='ln_ic50',
-                     tissue_col='tissue_type', n_permutations=20):
+                     tissue_col='tissue_type', n_permutations=100,
+                     **kwargs):
     """
-    Shuffle tissue labels, re-estimate naive ATE, build null distribution.
+    Backward-compatible wrapper around the DR tissue permutation test.
+
+    Prefer ``src.causal.permutation.dr_permutation_test`` for new code.
+    Returns the summary dict only (legacy API).
     """
-    from src.causal.estimators import naive_ate
-    
-    # Force tissue to plain Python object array (no Arrow backend)
-    df = df.copy()
-    df[tissue_col] = df[tissue_col].astype(str).astype(object)
-    
-    # Observed naive ATE
-    obs = naive_ate(df)
-    obs_ate = obs['ate']
-    
-    # Extract as true numpy object array
-    tissues = df[tissue_col].to_numpy(dtype=object).copy()
-    null_ates = []
-    
-    rng = np.random.RandomState(42)
-    
-    for i in range(n_permutations):
-        perm_tissues = tissues.copy()
-        rng.shuffle(perm_tissues)
-        
-        df_perm = df.copy()
-        df_perm[tissue_col] = perm_tissues
-        
-        perm = naive_ate(df_perm)
-        null_ates.append(perm['ate'])
-    
-    null_ates = np.array(null_ates)
-    p_value = np.mean(np.abs(null_ates) >= np.abs(obs_ate))
-    
-    return {
-        'permutation_p_value': p_value,
-        'observed_ate': obs_ate,
-        'null_mean': np.mean(null_ates),
-        'null_std': np.std(null_ates),
-        'n_permutations': len(null_ates)
-    }
+    from src.causal.permutation import dr_permutation_test
+
+    summary, _null = dr_permutation_test(
+        df,
+        treatment_col=treatment_col,
+        outcome_col=outcome_col,
+        tissue_col=tissue_col,
+        n_permutations=n_permutations,
+        **kwargs,
+    )
+    return summary

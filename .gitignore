@@ -1,29 +1,106 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 *.pyo
 *.pyd
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
 
-# Virtual environment
+# Virtual environments
 venv/
 .venv/
 env/
+ENV/
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# OS
+# Operating system
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# Large datasets
-data/
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Temporary folders and caches
+/tmp/
+tmp*/
+tmp_*
+.tmp/
+.cache/
+*.cache
+
+# Root-level logs directory only (do not match archive/logs/)
+/logs/
+*.log
+
+# ---------------------------------------------------------------------------
+# Raw and processed datasets (see DATA.md) — never commit
+# ---------------------------------------------------------------------------
+data/raw/**
+!data/raw/.gitkeep
+data/processed/**
+!data/processed/.gitkeep
 datasets/
-*.csv
+
+# Common large / binary data extensions (defense in depth)
 *.zip
+*.tar
 *.tar.gz
+*.tgz
+*.7z
+*.gz
 *.h5
+*.hdf5
 *.pth
 *.pt
 *.ckpt
+*.xlsx
+*.parquet
+*.feather
+*.arrow
+*.pkl
+*.pickle
+*.joblib
+*.rds
+*.RData
+
+# ---------------------------------------------------------------------------
+# Generated pipeline outputs — never commit (see OUTPUTS.md)
+# ---------------------------------------------------------------------------
+output/**
+!output/.gitkeep
+!output/README.md
+
+# Explicit output patterns (defense in depth)
+output/*.png
+output/*.pdf
+output/*.svg
+output/*.json
+output/*.parquet
+output/*.xlsx
+output/*.csv
+
+# ---------------------------------------------------------------------------
+# Archive: keep documentation only; ignore logs and old artifacts
+# ---------------------------------------------------------------------------
+archive/logs/**
+!archive/logs/README.md
+archive/validation_audits/**
+!archive/validation_audits/README.md

@@ -112,11 +112,11 @@ def main():
         # Flag problematic cohorts
         flagged = default_report[default_report['overlap_coefficient'] < 0.5]
         if len(flagged) > 0:
-            print(f"\n⚠️  Flagged {len(flagged)} cohorts with overlap < 0.5:")
+            print(f"\nWARNING: Flagged {len(flagged)} cohorts with overlap < 0.5:")
             for _, row in flagged.head(5).iterrows():
                 print(f"  {row['dataset']} {row['drug_class']} {row['pathway']}: overlap={row['overlap_coefficient']:.3f}")
         
-        print("\nNext: Phase 4 (Causal Estimation)")
+        print("\nNext: Phase 3B (IPW Balance Diagnostics)")
     else:
         print("\nERROR: No common support assessments generated.")
 
